@@ -57,13 +57,27 @@ run_homebrew_installer() {
   local install_url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 
   if [[ "$DRY_RUN" == "1" ]]; then
-    printf '[dry-run] /bin/bash -c "$(curl -fsSL %s)"\n' "$install_url"
+    printf '[dry-run] curl -fsSL %q -o "$(mktemp -d)/install.sh"\n' "$install_url"
+    printf '[dry-run] /bin/bash "<downloaded-homebrew-installer>" < /dev/tty\n'
     return 0
   fi
 
-  # Run the official installer directly from this terminal, without an extra bash -lc wrapper,
-  # so sudo prompts stay attached to the user's interactive session.
-  /bin/bash -c "$(curl -fsSL "$install_url")"
+  if [[ ! -r /dev/tty ]]; then
+    die "No interactive terminal is available for the Homebrew installer. Run the installer manually in Terminal, then re-run ./bootstrap.sh."
+  fi
+
+  local temp_dir installer_path
+  temp_dir="$(mktemp -d)"
+  installer_path="$temp_dir/install.sh"
+
+  curl -fsSL "$install_url" -o "$installer_path"
+  chmod +x "$installer_path"
+
+  # Homebrew's installer is a Bash script. Feed it from /dev/tty so prompts work when
+  # this bootstrap was launched from zsh, bash, or a curl pipe.
+  /bin/bash "$installer_path" < /dev/tty
+
+  rm -rf "$temp_dir"
 }
 
 ensure_dir() {
@@ -199,7 +213,7 @@ ensure_homebrew() {
 
   log "Homebrew is missing. Installing Homebrew as the current user."
   warn "Do not re-run this script with sudo. The Homebrew installer may ask for your macOS password when it needs administrator approval."
-  warn "If this step cannot prompt correctly, run the Homebrew installer manually, then re-run ./bootstrap.sh."
+  warn "The installer is attached to /dev/tty so password prompts work from zsh, bash, or curl-piped bootstrap runs."
   run_homebrew_installer
 
   local prefix

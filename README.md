@@ -25,6 +25,8 @@ Fresh macOS with network access. No secrets, tokens, passwords, or SSH keys belo
 
 Run `bootstrap.sh` as your normal macOS user. Do not run it with `sudo`. Homebrew refuses root installs, and `sudo` changes `$HOME`, which would put repo state and Pi config under `/var/root`.
 
+macOS uses zsh as the default login shell. This repo still uses Bash for scripts because the scripts need deterministic Bash behavior. The Homebrew installer itself is also a Bash script. `bootstrap.sh` downloads that installer and runs it attached to `/dev/tty`, so password prompts work from zsh, bash, or a `curl | bash` bootstrap run.
+
 The bootstrap script can install Xcode Command Line Tools and Homebrew if missing. Homebrew's official installer may ask for administrator approval. Approve that prompt when it appears, but do not start this repo's bootstrap script with `sudo`.
 
 ## Fresh MacBook usage
@@ -256,7 +258,7 @@ gh auth setup-git
 
 If Xcode Command Line Tools installation starts, finish the GUI installer, then re-run `./bootstrap.sh`.
 
-If Homebrew installation fails because it needs administrator approval, do not retry with `sudo ./bootstrap.sh`. Run the official Homebrew installer manually as your normal user, approve its sudo prompt, load `brew shellenv`, then re-run `./bootstrap.sh`.
+If Homebrew installation fails because it cannot access an interactive terminal or cannot complete administrator approval, do not retry with `sudo ./bootstrap.sh`. Run the official Homebrew installer manually as your normal user, approve its sudo prompt, load `brew shellenv`, then re-run `./bootstrap.sh`.
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
