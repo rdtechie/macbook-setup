@@ -36,8 +36,6 @@ error() { printf '[ERROR] %s\n' "$*" >&2; }
 die() { error "$*"; exit 1; }
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
-SUDO_KEEPALIVE_PID=""
-
 run() {
   if [[ "$DRY_RUN" == "1" ]]; then
     printf '[dry-run]'
@@ -57,38 +55,10 @@ run_shell() {
   bash -lc "$command_string"
 }
 
-stop_sudo_keepalive() {
-  if [[ -n "${SUDO_KEEPALIVE_PID:-}" ]]; then
-    kill "$SUDO_KEEPALIVE_PID" >/dev/null 2>&1 || true
-    wait "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
-    SUDO_KEEPALIVE_PID=""
-  fi
-}
-
-prime_sudo_for_homebrew() {
-  if [[ "$DRY_RUN" == "1" ]]; then
-    printf '[dry-run] sudo -v < /dev/tty\n'
-    printf '[dry-run] start sudo timestamp keepalive for Homebrew .pkg install\n'
-    return 0
-  fi
-
-  log "Requesting administrator approval once for Homebrew's .pkg installer."
-  sudo -v < /dev/tty
-
-  while true; do
-    sudo -n -v >/dev/null 2>&1 || exit 0
-    sleep 60
-  done &
-  SUDO_KEEPALIVE_PID="$!"
-}
-
-trap stop_sudo_keepalive EXIT
-
 install_homebrew_pkg() {
   if [[ "$DRY_RUN" == "1" ]]; then
     printf '[dry-run] curl -fsSL %q -o "$(mktemp -d)/Homebrew.pkg"\n' "$HOMEBREW_PKG_URL"
-    prime_sudo_for_homebrew
-    printf '[dry-run] sudo -n installer -pkg "<downloaded-Homebrew.pkg>" -target /\n'
+    printf '[dry-run] sudo installer -pkg "<downloaded-Homebrew.pkg>" -target / < /dev/tty\n'
     return 0
   fi
 
@@ -103,10 +73,9 @@ install_homebrew_pkg() {
 
   curl -fsSL "$HOMEBREW_PKG_URL" -o "$pkg_path"
 
-  prime_sudo_for_homebrew
-  sudo -n installer -pkg "$pkg_path" -target / || install_status=$?
+  log "Requesting administrator approval for Homebrew's .pkg installer."
+  sudo installer -pkg "$pkg_path" -target / < /dev/tty || install_status=$?
 
-  stop_sudo_keepalive
   rm -rf "$temp_dir"
 
   return "$install_status"
@@ -244,9 +213,8 @@ ensure_homebrew() {
   fi
 
   log "Homebrew is missing. Installing Homebrew with Homebrew's macOS .pkg installer."
-  warn "Do not re-run this script with sudo. Bootstrap will request administrator approval once with sudo -v."
-  warn "The sudo timestamp is kept alive while installer(8) runs."
-  warn "Only the isolated pkg install uses sudo; the rest of bootstrap runs as your normal user."
+  warn "Do not re-run this script with sudo. Only the isolated pkg install uses sudo."
+  warn "The pkg installer is attached to /dev/tty so the password prompt can complete interactively."
   install_homebrew_pkg
 
   local prefix

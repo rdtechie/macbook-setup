@@ -27,7 +27,7 @@ Run `bootstrap.sh` as your normal macOS user. Do not run it with `sudo`. Homebre
 
 macOS uses zsh as the default login shell. This repo still uses Bash for scripts because the scripts need deterministic Bash behavior.
 
-The bootstrap script can install Xcode Command Line Tools and Homebrew if missing. Homebrew is installed through Homebrew's official macOS `.pkg` release asset, matching Homebrew's current recommendation for interactive or unattended macOS installs. `bootstrap.sh` runs `sudo -v` once before invoking `installer(8)` and keeps the sudo timestamp alive while the package installer runs. Approve that initial prompt when it appears, but do not start this repo's bootstrap script with `sudo`.
+The bootstrap script can install Xcode Command Line Tools and Homebrew if missing. Homebrew is installed through Homebrew's official macOS `.pkg` release asset, matching Homebrew's current recommendation for interactive or unattended macOS installs. The script invokes `sudo installer -pkg ... -target /` with stdin attached to `/dev/tty`, so the password prompt can complete interactively. Approve that prompt when it appears, but do not start this repo's bootstrap script with `sudo`.
 
 ## Fresh MacBook usage
 
