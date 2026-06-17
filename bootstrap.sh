@@ -34,6 +34,8 @@ error() { printf '[ERROR] %s\n' "$*" >&2; }
 die() { error "$*"; exit 1; }
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
+SUDO_KEEPALIVE_PID=""
+
 run() {
   if [[ "$DRY_RUN" == "1" ]]; then
     printf '[dry-run]'
@@ -53,11 +55,39 @@ run_shell() {
   bash -lc "$command_string"
 }
 
+stop_sudo_keepalive() {
+  if [[ -n "${SUDO_KEEPALIVE_PID:-}" ]]; then
+    kill "$SUDO_KEEPALIVE_PID" >/dev/null 2>&1 || true
+    wait "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+    SUDO_KEEPALIVE_PID=""
+  fi
+}
+
+prime_sudo_for_homebrew() {
+  if [[ "$DRY_RUN" == "1" ]]; then
+    printf '[dry-run] sudo -v < /dev/tty\n'
+    printf '[dry-run] start sudo timestamp keepalive for Homebrew installer\n'
+    return 0
+  fi
+
+  log "Requesting administrator approval once for the Homebrew installer."
+  sudo -v < /dev/tty
+
+  while true; do
+    sudo -n -v >/dev/null 2>&1 || exit 0
+    sleep 60
+  done &
+  SUDO_KEEPALIVE_PID="$!"
+}
+
+trap stop_sudo_keepalive EXIT
+
 run_homebrew_installer() {
   local install_url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 
   if [[ "$DRY_RUN" == "1" ]]; then
     printf '[dry-run] curl -fsSL %q -o "$(mktemp -d)/install.sh"\n' "$install_url"
+    prime_sudo_for_homebrew
     printf '[dry-run] /bin/bash "<downloaded-homebrew-installer>" < /dev/tty\n'
     return 0
   fi
@@ -73,11 +103,17 @@ run_homebrew_installer() {
   curl -fsSL "$install_url" -o "$installer_path"
   chmod +x "$installer_path"
 
+  prime_sudo_for_homebrew
+
+  local install_status=0
   # Homebrew's installer is a Bash script. Feed it from /dev/tty so prompts work when
   # this bootstrap was launched from zsh, bash, or a curl pipe.
-  /bin/bash "$installer_path" < /dev/tty
+  /bin/bash "$installer_path" < /dev/tty || install_status=$?
 
+  stop_sudo_keepalive
   rm -rf "$temp_dir"
+
+  return "$install_status"
 }
 
 ensure_dir() {
@@ -212,8 +248,9 @@ ensure_homebrew() {
   fi
 
   log "Homebrew is missing. Installing Homebrew as the current user."
-  warn "Do not re-run this script with sudo. The Homebrew installer may ask for your macOS password when it needs administrator approval."
-  warn "The installer is attached to /dev/tty so password prompts work from zsh, bash, or curl-piped bootstrap runs."
+  warn "Do not re-run this script with sudo. Bootstrap will request administrator approval once with sudo -v."
+  warn "The sudo timestamp is kept alive while Homebrew runs so each installer step should not ask again."
+  warn "The installer is attached to /dev/tty so prompts work from zsh, bash, or curl-piped bootstrap runs."
   run_homebrew_installer
 
   local prefix
