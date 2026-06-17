@@ -30,5 +30,25 @@ Operational behavior:
 7. Prefer `brew bundle --file Brewfile`, `stow`, and the scripts in `scripts/` over direct package or dotfile edits.
 8. After each phase, summarize what changed and run verification.
 9. Final response must summarize completed work, failed work, skipped work, and manual follow-up.
+10. **Phase 7 destroys the current Dock layout.** Before running `./scripts/apply-macos-defaults.sh`, warn the user that all pinned Dock icons will be removed (only Finder stays) and ask for explicit approval.
+
+macOS defaults applied by `scripts/apply-macos-defaults.sh`:
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| Dock auto-hide | always on | Dock slides away when not in use |
+| Dock icon size | 24 px | Half the macOS default of 48 px |
+| Dock pinned apps | cleared | All icons removed; Finder is always present separately |
+| Key repeat rate | 2 (fastest) | `NSGlobalDomain KeyRepeat` |
+| Initial key repeat delay | 25 | ~25% of slider range; fast end (`NSGlobalDomain InitialKeyRepeat`) |
+| Screenshot location | `~/Pictures/Screenshots` | Keeps Desktop clean |
+| Screenshot format | PNG | |
+| Finder: show extensions | true | |
+| Finder: path bar | true | |
+| Finder: status bar | true | |
+| Finder: search scope | current folder | |
+| Finder: folders first | true | |
+| Finder: default view | list | |
+| .DS_Store on network/USB | disabled | |
 
 If verification reports warnings only, explain whether they are expected manual actions. If verification reports failures, provide the exact failing checks and the next command or approval required.

@@ -65,9 +65,31 @@
       "domain": "com.apple.dock",
       "key": "autohide",
       "value": true,
-      "optional": true,
-      "enabledBy": "ENABLE_DOCK_AUTOHIDE=1",
-      "reason": "Optional preference for more vertical screen space."
+      "reason": "Auto-hide the Dock to reclaim vertical screen space."
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "tilesize",
+      "value": 24,
+      "reason": "Half the default Dock icon size (48 → 24) for a less obtrusive Dock."
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "persistent-apps",
+      "value": [],
+      "reason": "Remove all pinned app icons from the Dock; Finder is always present separately."
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "KeyRepeat",
+      "value": 2,
+      "reason": "Fastest key-repeat rate (macOS minimum)."
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "InitialKeyRepeat",
+      "value": 25,
+      "reason": "Initial key-repeat delay at roughly 25% of the slider range (fast end)."
     }
   ]
 }

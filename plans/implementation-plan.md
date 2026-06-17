@@ -222,7 +222,15 @@ Manual approval points:
 
 ## Phase 7 — Apply macOS defaults
 
-Goal: apply conservative macOS quality-of-life settings documented in the repository.
+Goal: apply macOS quality-of-life settings documented in the repository.
+
+Settings applied by this phase:
+
+- **Dock** — auto-hide always on, icon size halved (24 px), all pinned app icons removed (Finder is always present separately).
+- **Keyboard** — fastest key-repeat rate (`KeyRepeat=2`), initial key-repeat delay at roughly 25% of the slider range (`InitialKeyRepeat=25`).
+- **Finder** — path bar, status bar, current-folder search, folders first, list view.
+- **Screenshots** — saved to `~/Pictures/Screenshots` as PNG.
+- **Desktop services** — no `.DS_Store` on network or USB volumes.
 
 Commands to run:
 
@@ -232,29 +240,23 @@ Commands to run:
 ./scripts/verify.sh
 ```
 
-Optional Dock autohide, only if the user explicitly wants it:
-
-```bash
-ENABLE_DOCK_AUTOHIDE=1 ./scripts/apply-macos-defaults.sh
-./scripts/verify.sh
-```
-
 What to verify:
 
 - Screenshot directory exists.
 - Finder settings apply without errors.
-- Non-disruptive affected services restart: Finder and SystemUIServer.
-- Dock restarts only when Dock autohide is explicitly enabled.
+- Dock auto-hides, is noticeably smaller, and shows only Finder after re-login or Dock restart.
+- Keyboard repeat and initial delay reflect the new values in System Settings → Keyboard.
+- Non-disruptive affected services restart: Finder, SystemUIServer, and Dock.
 
 Stop conditions:
 
 - Host is not macOS.
 - `defaults` command fails.
-- User rejects the optional Dock autohide setting.
 
 Manual approval points:
 
-- Ask before enabling Dock autohide.
+- Removing all Dock icons (except Finder) is destructive to the user's current Dock layout. Explain this and ask before running.
+- Explain that keyboard delay changes take effect immediately but may feel jarring until the user adjusts.
 - Explain that some UI settings require reopening Finder windows or starting a new terminal session.
 
 ## Phase 8 — Verify full setup
