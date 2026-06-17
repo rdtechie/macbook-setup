@@ -8,6 +8,7 @@ SKIP_GH_AUTH="${SKIP_GH_AUTH:-0}"
 SKIP_PI_INSTALL="${SKIP_PI_INSTALL:-0}"
 SKIP_PI_PACKAGES="${SKIP_PI_PACKAGES:-0}"
 PI_INSTALL_COMMAND="${PI_INSTALL_COMMAND:-bun install -g @earendil-works/pi-coding-agent}"
+HOMEBREW_PKG_URL="${HOMEBREW_PKG_URL:-https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg}"
 
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
 
@@ -16,11 +17,12 @@ usage() {
 Usage: ./bootstrap.sh [--dry-run] [--help]
 
 Run this script as your normal macOS user. Do not run it with sudo.
-Homebrew may ask for administrator approval during its own installer.
+Homebrew is installed through Homebrew's macOS .pkg installer with one isolated sudo prompt.
 
 Environment variables:
   REPO_URL          Git URL used when cloning this repo.
   REPO_DIR          Local checkout path. Default: ~/src/macbook-setup
+  HOMEBREW_PKG_URL  Homebrew .pkg URL. Default: latest Homebrew.pkg GitHub release asset.
   SKIP_GH_AUTH      Set to 1 to skip GitHub CLI authentication.
   SKIP_PI_INSTALL   Set to 1 to skip installing pi when missing.
   SKIP_PI_PACKAGES  Set to 1 to skip installing packages from config/pi-packages.txt.
@@ -66,11 +68,11 @@ stop_sudo_keepalive() {
 prime_sudo_for_homebrew() {
   if [[ "$DRY_RUN" == "1" ]]; then
     printf '[dry-run] sudo -v < /dev/tty\n'
-    printf '[dry-run] start sudo timestamp keepalive for Homebrew installer\n'
+    printf '[dry-run] start sudo timestamp keepalive for Homebrew .pkg install\n'
     return 0
   fi
 
-  log "Requesting administrator approval once for the Homebrew installer."
+  log "Requesting administrator approval once for Homebrew's .pkg installer."
   sudo -v < /dev/tty
 
   while true; do
@@ -82,33 +84,27 @@ prime_sudo_for_homebrew() {
 
 trap stop_sudo_keepalive EXIT
 
-run_homebrew_installer() {
-  local install_url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-
+install_homebrew_pkg() {
   if [[ "$DRY_RUN" == "1" ]]; then
-    printf '[dry-run] curl -fsSL %q -o "$(mktemp -d)/install.sh"\n' "$install_url"
+    printf '[dry-run] curl -fsSL %q -o "$(mktemp -d)/Homebrew.pkg"\n' "$HOMEBREW_PKG_URL"
     prime_sudo_for_homebrew
-    printf '[dry-run] /bin/bash "<downloaded-homebrew-installer>" < /dev/tty\n'
+    printf '[dry-run] sudo -n installer -pkg "<downloaded-Homebrew.pkg>" -target /\n'
     return 0
   fi
 
   if [[ ! -r /dev/tty ]]; then
-    die "No interactive terminal is available for the Homebrew installer. Run the installer manually in Terminal, then re-run ./bootstrap.sh."
+    die "No interactive terminal is available for sudo approval. Install Homebrew.pkg manually in Terminal, then re-run ./bootstrap.sh."
   fi
 
-  local temp_dir installer_path
+  local temp_dir pkg_path install_status
   temp_dir="$(mktemp -d)"
-  installer_path="$temp_dir/install.sh"
+  pkg_path="$temp_dir/Homebrew.pkg"
+  install_status=0
 
-  curl -fsSL "$install_url" -o "$installer_path"
-  chmod +x "$installer_path"
+  curl -fsSL "$HOMEBREW_PKG_URL" -o "$pkg_path"
 
   prime_sudo_for_homebrew
-
-  local install_status=0
-  # Homebrew's installer is a Bash script. Feed it from /dev/tty so prompts work when
-  # this bootstrap was launched from zsh, bash, or a curl pipe.
-  /bin/bash "$installer_path" < /dev/tty || install_status=$?
+  sudo -n installer -pkg "$pkg_path" -target / || install_status=$?
 
   stop_sudo_keepalive
   rm -rf "$temp_dir"
@@ -247,11 +243,11 @@ ensure_homebrew() {
     return 0
   fi
 
-  log "Homebrew is missing. Installing Homebrew as the current user."
+  log "Homebrew is missing. Installing Homebrew with Homebrew's macOS .pkg installer."
   warn "Do not re-run this script with sudo. Bootstrap will request administrator approval once with sudo -v."
-  warn "The sudo timestamp is kept alive while Homebrew runs so each installer step should not ask again."
-  warn "The installer is attached to /dev/tty so prompts work from zsh, bash, or curl-piped bootstrap runs."
-  run_homebrew_installer
+  warn "The sudo timestamp is kept alive while installer(8) runs."
+  warn "Only the isolated pkg install uses sudo; the rest of bootstrap runs as your normal user."
+  install_homebrew_pkg
 
   local prefix
   prefix="$(brew_prefix_guess)"

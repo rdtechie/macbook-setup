@@ -25,9 +25,9 @@ Fresh macOS with network access. No secrets, tokens, passwords, or SSH keys belo
 
 Run `bootstrap.sh` as your normal macOS user. Do not run it with `sudo`. Homebrew refuses root installs, and `sudo` changes `$HOME`, which would put repo state and Pi config under `/var/root`.
 
-macOS uses zsh as the default login shell. This repo still uses Bash for scripts because the scripts need deterministic Bash behavior. The Homebrew installer itself is also a Bash script. `bootstrap.sh` downloads that installer and runs it attached to `/dev/tty`, so prompts work from zsh, bash, or a `curl | bash` bootstrap run.
+macOS uses zsh as the default login shell. This repo still uses Bash for scripts because the scripts need deterministic Bash behavior.
 
-The bootstrap script can install Xcode Command Line Tools and Homebrew if missing. Homebrew's official installer may ask for administrator approval. `bootstrap.sh` runs `sudo -v` once before the installer and keeps the sudo timestamp alive while Homebrew runs, so you should not get password prompts for every installer step. Approve that initial prompt when it appears, but do not start this repo's bootstrap script with `sudo`.
+The bootstrap script can install Xcode Command Line Tools and Homebrew if missing. Homebrew is installed through Homebrew's official macOS `.pkg` release asset, matching Homebrew's current recommendation for interactive or unattended macOS installs. `bootstrap.sh` runs `sudo -v` once before invoking `installer(8)` and keeps the sudo timestamp alive while the package installer runs. Approve that initial prompt when it appears, but do not start this repo's bootstrap script with `sudo`.
 
 ## Fresh MacBook usage
 
@@ -37,8 +37,10 @@ Recommended first run on a fresh Mac:
 # 1. Install Xcode Command Line Tools if missing.
 xcode-select -p >/dev/null 2>&1 || xcode-select --install
 
-# 2. Install Homebrew manually if missing. This installer may ask for your macOS password.
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# 2. Install Homebrew manually if missing. This pkg install asks for your macOS password once.
+curl -fsSL https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg -o /tmp/Homebrew.pkg
+sudo installer -pkg /tmp/Homebrew.pkg -target /
+rm -f /tmp/Homebrew.pkg
 
 # 3. Load Homebrew in the current shell.
 if [[ -x /opt/homebrew/bin/brew ]]; then
@@ -61,7 +63,7 @@ cd ~/src/macbook-setup
 ./bootstrap.sh
 ```
 
-Remote bootstrap flow, useful after Homebrew is already working:
+Remote bootstrap flow:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rdtechie/macbook-setup/main/bootstrap.sh | bash
@@ -160,6 +162,7 @@ Dry runs print intended commands without making changes. `verify.sh` is read-onl
 
 - `REPO_URL`: Git URL used when cloning this repo.
 - `REPO_DIR`: local checkout path. Default: `~/src/macbook-setup`.
+- `HOMEBREW_PKG_URL`: Homebrew `.pkg` URL. Default: `https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg`.
 - `SKIP_GH_AUTH=1`: skip GitHub CLI auth.
 - `SKIP_PI_INSTALL=1`: skip installing Pi.
 - `SKIP_PI_PACKAGES=1`: skip installing packages in `config/pi-packages.txt`.
@@ -258,10 +261,13 @@ gh auth setup-git
 
 If Xcode Command Line Tools installation starts, finish the GUI installer, then re-run `./bootstrap.sh`.
 
-If Homebrew installation fails because it cannot access an interactive terminal or cannot complete administrator approval, do not retry with `sudo ./bootstrap.sh`. Run the official Homebrew installer manually as your normal user, approve its sudo prompt, load `brew shellenv`, then re-run `./bootstrap.sh`. If macOS still asks repeatedly, run `sudo -v` first in the same terminal, then start the installer.
+If Homebrew installation fails because it cannot access an interactive terminal or cannot complete administrator approval, do not retry with `sudo ./bootstrap.sh`. Install Homebrew's official `.pkg` manually as your normal user, approve its sudo prompt, load `brew shellenv`, then re-run `./bootstrap.sh`.
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+curl -fsSL https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg -o /tmp/Homebrew.pkg
+sudo installer -pkg /tmp/Homebrew.pkg -target /
+rm -f /tmp/Homebrew.pkg
+
 if [[ -x /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ -x /usr/local/bin/brew ]]; then
