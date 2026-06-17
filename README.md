@@ -15,6 +15,7 @@ The shell script installs prerequisites. The repository defines desired state. T
 - Homebrew and `Brewfile` packages
 - GitHub CLI authentication and Git credential integration
 - Pi and Pi packages
+- Node.js/npm runtime for Pi
 - fish, tmux, Neovim/LazyVim-ready placeholder config, Ghostty, mise, uv
 - Stow-managed dotfiles
 - Conservative macOS defaults
@@ -166,7 +167,7 @@ Dry runs print intended commands without making changes. `verify.sh` is read-onl
 - `SKIP_GH_AUTH=1`: skip GitHub CLI auth.
 - `SKIP_PI_INSTALL=1`: skip installing Pi.
 - `SKIP_PI_PACKAGES=1`: skip installing packages in `config/pi-packages.txt`.
-- `PI_INSTALL_COMMAND`: command used to install Pi. Default: `bun install -g @earendil-works/pi-coding-agent`.
+- `PI_INSTALL_COMMAND`: command used to install Pi. Default: `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`.
 
 Example:
 
@@ -275,6 +276,8 @@ elif [[ -x /usr/local/bin/brew ]]; then
 fi
 ./bootstrap.sh
 ```
+
+If Pi package installation fails with `env: node: No such file or directory`, Node.js is missing from the shell that runs Pi. Re-run `brew bundle --file Brewfile`, confirm `node --version` works, then re-run `./bootstrap.sh`. Pi is installed with npm by default and needs Node.js at runtime.
 
 If Pi starts without an authenticated provider, run `/login`, select `GitHub Copilot`, complete browser authentication, then run `/model` and choose the latest available Claude Sonnet model or Copilot coding model.
 

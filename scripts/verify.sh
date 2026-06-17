@@ -153,6 +153,8 @@ main() {
   check_command brew
   check_command gh
   check_gh_auth
+  check_command node
+  check_command npm
   check_command pi
   check_command fish
   check_command tmux

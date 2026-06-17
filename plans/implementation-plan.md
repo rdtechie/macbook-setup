@@ -61,7 +61,7 @@ What to verify:
   - Apple Silicon: `/opt/homebrew`
   - Intel: `/usr/local`
 - `brew bundle --file Brewfile` completes.
-- Required CLI tools exist: `git`, `gh`, `stow`, `fish`, `tmux`, `nvim`, `mise`, `uv`.
+- Required CLI tools exist: `git`, `gh`, `stow`, `fish`, `tmux`, `nvim`, `mise`, `uv`, `node`, and `npm`.
 - Required casks are installed or Homebrew reports actionable cask failures.
 
 Stop conditions:
@@ -270,7 +270,7 @@ brew bundle check --file Brewfile
 
 What to verify:
 
-- Required commands exist.
+- Required commands exist, including `node` and `npm` for Pi runtime support.
 - `gh auth status` is successful or intentionally deferred.
 - Dotfile symlinks exist.
 - Pi skill symlink exists at `~/.pi/agent/skills/macbook-setup`.

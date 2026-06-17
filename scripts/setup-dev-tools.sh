@@ -95,6 +95,8 @@ main() {
   check_tool eza
   check_tool zoxide
   check_tool starship
+  check_tool node
+  check_tool npm
   check_tool shellcheck
   check_tool shfmt
 

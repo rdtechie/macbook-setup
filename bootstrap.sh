@@ -7,7 +7,7 @@ REPO_DIR="${REPO_DIR:-$HOME/src/macbook-setup}"
 SKIP_GH_AUTH="${SKIP_GH_AUTH:-0}"
 SKIP_PI_INSTALL="${SKIP_PI_INSTALL:-0}"
 SKIP_PI_PACKAGES="${SKIP_PI_PACKAGES:-0}"
-PI_INSTALL_COMMAND="${PI_INSTALL_COMMAND:-bun install -g @earendil-works/pi-coding-agent}"
+PI_INSTALL_COMMAND="${PI_INSTALL_COMMAND:-npm install -g --ignore-scripts @earendil-works/pi-coding-agent}"
 HOMEBREW_PKG_URL="${HOMEBREW_PKG_URL:-https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg}"
 
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
@@ -26,7 +26,7 @@ Environment variables:
   SKIP_GH_AUTH      Set to 1 to skip GitHub CLI authentication.
   SKIP_PI_INSTALL   Set to 1 to skip installing pi when missing.
   SKIP_PI_PACKAGES  Set to 1 to skip installing packages from config/pi-packages.txt.
-  PI_INSTALL_COMMAND Command used to install pi. Default: bun install -g @earendil-works/pi-coding-agent
+  PI_INSTALL_COMMAND Command used to install pi. Default: npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 USAGE
 }
 
@@ -301,7 +301,23 @@ configure_gh() {
   fi
 }
 
+ensure_node_runtime() {
+  if command_exists node; then
+    log "Node.js detected: $(node --version 2>/dev/null || command -v node)"
+    return 0
+  fi
+
+  if [[ "$DRY_RUN" == "1" ]]; then
+    printf '[dry-run] verify node is available for Pi runtime\n'
+    return 0
+  fi
+
+  die "Node.js is required to run Pi and Pi packages, but 'node' is missing. Re-run: brew bundle --file Brewfile"
+}
+
 install_pi() {
+  ensure_node_runtime
+
   if command_exists pi; then
     log "Pi detected: $(command -v pi)"
     return 0
@@ -324,6 +340,8 @@ install_pi_packages() {
     log "Skipping Pi package installation because SKIP_PI_PACKAGES=1."
     return 0
   fi
+
+  ensure_node_runtime
 
   if ! command_exists pi && [[ "$DRY_RUN" != "1" ]]; then
     warn "Pi is not installed. Skipping Pi package installation."
