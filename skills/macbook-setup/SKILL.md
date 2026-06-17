@@ -52,3 +52,39 @@ macOS defaults applied by `scripts/apply-macos-defaults.sh`:
 | .DS_Store on network/USB | disabled | |
 
 If verification reports warnings only, explain whether they are expected manual actions. If verification reports failures, provide the exact failing checks and the next command or approval required.
+
+## Stow directory-folding behaviour
+
+This repository uses GNU Stow's **directory-folding** strategy for packages whose configs live under `~/.config/`. Rather than creating individual file symlinks, Stow replaces the entire config subdirectory with a single directory-level symlink into the repo:
+
+| Live path | Symlink target |
+|-----------|----------------|
+| `~/.config/fish` | `~/src/macbook-setup/dotfiles/fish/.config/fish` |
+| `~/.config/ghostty` | `~/src/macbook-setup/dotfiles/ghostty/.config/ghostty` |
+| `~/.config/mise` | `~/src/macbook-setup/dotfiles/mise/.config/mise` |
+| `~/.config/nvim` | `~/src/macbook-setup/dotfiles/nvim/.config/nvim` |
+
+Files inside those directories are **regular files in the repo**, not themselves symlinks. `verify.sh`'s `check_dotfile_link` function is aware of this: it calls `realpath` on the target path and passes if the resolved path falls under `$REPO_DIR/dotfiles/`.
+
+### Gotcha: `setup-dotfiles.sh` backup removes repo files
+
+If `setup-dotfiles.sh` runs while any of the above directory-level symlinks already exist, its conflict-backup logic will `mv` files like `config.fish` **out of the repo directory** (because the live path resolves into the repo). The files land safely in `~/.backup/macbook-setup/<timestamp>/`, but they are absent from the dotfiles tree until restored.
+
+**Recovery procedure** (no data is lost — just copy from backup):
+
+```bash
+BACKUP=~/.backup/macbook-setup/<timestamp>
+cp "$BACKUP/config.fish"   ~/src/macbook-setup/dotfiles/fish/.config/fish/config.fish
+cp "$BACKUP/fish_variables" ~/src/macbook-setup/dotfiles/fish/.config/fish/fish_variables
+cp "$BACKUP/config"        ~/src/macbook-setup/dotfiles/ghostty/.config/ghostty/config
+cp "$BACKUP/config.toml"   ~/src/macbook-setup/dotfiles/mise/.config/mise/config.toml
+cp "$BACKUP/init.lua"      ~/src/macbook-setup/dotfiles/nvim/.config/nvim/init.lua
+cp "$BACKUP/lazy.lua"      ~/src/macbook-setup/dotfiles/nvim/.config/nvim/lua/config/lazy.lua
+cp "$BACKUP/editor.lua"    ~/src/macbook-setup/dotfiles/nvim/.config/nvim/lua/plugins/editor.lua
+```
+
+After restoring, run `./scripts/verify.sh` — all dotfile checks should PASS with "exists via stowed directory".
+
+### `fish_variables`
+
+`dotfiles/fish/.config/fish/fish_variables` is committed to the repo. It contains only the fish initialization marker (`__fish_initialized`) and is safe to track. Fish regenerates it automatically if absent.
