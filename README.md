@@ -277,7 +277,18 @@ fi
 ./bootstrap.sh
 ```
 
-If Pi package installation fails with `env: node: No such file or directory`, Node.js is missing from the shell that runs Pi. Re-run `brew bundle --file Brewfile`, confirm `node --version` works, then re-run `./bootstrap.sh`. Pi is installed with npm by default and needs Node.js at runtime.
+If Pi package installation fails with `env: node: No such file or directory`, Node.js is missing from the shell that runs Pi or Homebrew's shell environment was not refreshed after installing `node`. Run:
+
+```bash
+eval "$(brew shellenv)"
+hash -r
+brew bundle --file Brewfile
+node --version
+npm --version
+./bootstrap.sh
+```
+
+Pi is installed with npm by default and needs Node.js at runtime.
 
 If Pi starts without an authenticated provider, run `/login`, select `GitHub Copilot`, complete browser authentication, then run `/model` and choose the latest available Claude Sonnet model or Copilot coding model.
 

@@ -136,6 +136,18 @@ load_homebrew_env() {
     return 1
   fi
   eval "$("$brew_bin" shellenv)"
+  hash -r 2>/dev/null || true
+}
+
+refresh_homebrew_env() {
+  if [[ "$DRY_RUN" == "1" ]]; then
+    printf '[dry-run] eval "$(brew shellenv)"\n'
+    printf '[dry-run] hash -r\n'
+    return 0
+  fi
+
+  load_homebrew_env || die "Homebrew is installed but its shell environment could not be loaded."
+  log "Homebrew environment loaded from $(brew --prefix)."
 }
 
 parse_args() {
@@ -229,6 +241,7 @@ ensure_homebrew() {
   fi
 
   eval "$("$prefix/bin/brew" shellenv)"
+  hash -r 2>/dev/null || true
 }
 
 current_checkout_dir() {
@@ -273,6 +286,7 @@ install_brew_bundle() {
   [[ -f "$brewfile" ]] || die "Missing Brewfile: $brewfile"
   log "Installing Homebrew packages from $brewfile"
   run brew bundle --file "$brewfile"
+  refresh_homebrew_env
 }
 
 configure_gh() {
@@ -302,17 +316,22 @@ configure_gh() {
 }
 
 ensure_node_runtime() {
-  if command_exists node; then
+  if ! command_exists node || ! command_exists npm; then
+    refresh_homebrew_env
+  fi
+
+  if command_exists node && command_exists npm; then
     log "Node.js detected: $(node --version 2>/dev/null || command -v node)"
+    log "npm detected: $(npm --version 2>/dev/null || command -v npm)"
     return 0
   fi
 
   if [[ "$DRY_RUN" == "1" ]]; then
-    printf '[dry-run] verify node is available for Pi runtime\n'
+    printf '[dry-run] verify node and npm are available for Pi runtime\n'
     return 0
   fi
 
-  die "Node.js is required to run Pi and Pi packages, but 'node' is missing. Re-run: brew bundle --file Brewfile"
+  die 'Node.js and npm are required to run Pi and Pi packages, but one is missing. Run: eval "$(brew shellenv)" && hash -r && brew bundle --file Brewfile'
 }
 
 install_pi() {
