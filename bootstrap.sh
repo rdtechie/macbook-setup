@@ -7,6 +7,7 @@ REPO_DIR="${REPO_DIR:-$HOME/src/macbook-setup}"
 SKIP_GH_AUTH="${SKIP_GH_AUTH:-0}"
 SKIP_PI_INSTALL="${SKIP_PI_INSTALL:-0}"
 SKIP_PI_PACKAGES="${SKIP_PI_PACKAGES:-0}"
+SKIP_PI_START="${SKIP_PI_START:-0}"
 PI_INSTALL_COMMAND="${PI_INSTALL_COMMAND:-npm install -g --ignore-scripts @earendil-works/pi-coding-agent}"
 HOMEBREW_PKG_URL="${HOMEBREW_PKG_URL:-https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg}"
 
@@ -26,6 +27,7 @@ Environment variables:
   SKIP_GH_AUTH      Set to 1 to skip GitHub CLI authentication.
   SKIP_PI_INSTALL   Set to 1 to skip installing pi when missing.
   SKIP_PI_PACKAGES  Set to 1 to skip installing packages from config/pi-packages.txt.
+  SKIP_PI_START     Set to 1 to skip launching pi after bootstrap.
   PI_INSTALL_COMMAND Command used to install pi. Default: npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 USAGE
 }
@@ -409,6 +411,42 @@ register_pi_skill() {
   run ln -s "$source" "$target"
 }
 
+start_pi() {
+  local repo_dir="$1"
+
+  if [[ "$SKIP_PI_START" == "1" ]]; then
+    log "Skipping Pi launch because SKIP_PI_START=1."
+    return 0
+  fi
+
+  if [[ "$DRY_RUN" == "1" ]]; then
+    printf '[dry-run] cd %q && pi < /dev/tty\n' "$repo_dir"
+    return 0
+  fi
+
+  if ! command_exists pi; then
+    warn "Pi is not installed. Cannot start Pi."
+    return 0
+  fi
+
+  if [[ ! -r /dev/tty ]]; then
+    warn "No interactive terminal is available to start Pi. Run manually: cd $repo_dir && pi"
+    return 0
+  fi
+
+  cat <<EOF
+
+Starting Pi from:
+  $repo_dir
+
+Inside Pi, run:
+  /skill:macbook-setup
+
+EOF
+
+  (cd "$repo_dir" && pi < /dev/tty)
+}
+
 main() {
   parse_args "$@"
   require_not_root
@@ -431,12 +469,14 @@ main() {
 
 Bootstrap complete.
 
-Next steps:
+If Pi does not start automatically, run:
   cd $repo_dir
   pi
   /skill:macbook-setup
 
 EOF
+
+  start_pi "$repo_dir"
 }
 
 main "$@"

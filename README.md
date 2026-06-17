@@ -79,7 +79,7 @@ curl -fsSL https://raw.githubusercontent.com/rdtechie/macbook-setup/main/bootstr
 
 ## First Pi session
 
-After bootstrap completes:
+`bootstrap.sh` starts Pi automatically at the end from the repository directory. If you skipped auto-start with `SKIP_PI_START=1` or Pi could not attach to the terminal, start it manually:
 
 ```bash
 cd ~/src/macbook-setup
@@ -167,12 +167,14 @@ Dry runs print intended commands without making changes. `verify.sh` is read-onl
 - `SKIP_GH_AUTH=1`: skip GitHub CLI auth.
 - `SKIP_PI_INSTALL=1`: skip installing Pi.
 - `SKIP_PI_PACKAGES=1`: skip installing packages in `config/pi-packages.txt`.
+- `SKIP_PI_START=1`: skip launching Pi after bootstrap.
 - `PI_INSTALL_COMMAND`: command used to install Pi. Default: `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`.
 
 Example:
 
 ```bash
 REPO_DIR=$HOME/Work/macbook-setup SKIP_GH_AUTH=1 ./bootstrap.sh
+SKIP_PI_START=1 ./bootstrap.sh
 ```
 
 ## Customize the Brewfile
