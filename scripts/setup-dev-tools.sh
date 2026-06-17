@@ -99,6 +99,7 @@ main() {
   check_tool npm
   check_tool shellcheck
   check_tool shfmt
+  check_tool aerospace
 
   configure_mise
   configure_uv

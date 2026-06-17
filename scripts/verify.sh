@@ -168,6 +168,7 @@ main() {
   check_dotfile_link "$HOME/.config/nvim/init.lua" "Neovim config"
   check_dotfile_link "$HOME/.tmux.conf" "tmux config"
   check_dotfile_link "$HOME/.config/ghostty/config" "Ghostty config"
+  check_dotfile_link "$HOME/.aerospace.toml" "AeroSpace config"
   check_dotfile_link "$HOME/.config/mise/config.toml" "mise config"
 
   check_pi_skill

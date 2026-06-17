@@ -1,0 +1,116 @@
+# AeroSpace config inspired by the current Omarchy Hyprland bindings.
+# Hyprland SUPER maps to macOS Command here.
+
+start-at-login = true
+
+after-startup-command = []
+exec-on-workspace-change = []
+
+automatically-unhide-macos-hidden-apps = false
+
+[key-mapping]
+preset = "qwerty"
+
+[gaps]
+inner.horizontal = 8
+inner.vertical = 8
+outer.left = 8
+outer.bottom = 8
+outer.top = 8
+outer.right = 8
+
+[mode.main.binding]
+# Applications, matching Omarchy's SUPER-based launcher bindings.
+cmd-enter = "exec-and-forget open -na Ghostty"
+cmd-alt-enter = "exec-and-forget open -na Ghostty"
+cmd-shift-enter = "exec-and-forget open -a Safari"
+cmd-shift-f = "exec-and-forget open ~"
+cmd-shift-b = "exec-and-forget open -a Safari"
+cmd-shift-slash = "exec-and-forget open -a 'Proton Pass'"
+cmd-shift-e = "exec-and-forget open -a 'Proton Mail'"
+cmd-shift-p = "exec-and-forget open -a 'Proton Drive'"
+cmd-shift-a = "exec-and-forget open https://chatgpt.com"
+cmd-shift-y = "exec-and-forget open https://youtube.com"
+cmd-shift-x = "exec-and-forget open https://x.com"
+
+# Window control, based on Omarchy tiling-v2.conf.
+cmd-w = "close"
+cmd-j = "layout tiles horizontal vertical"
+cmd-p = "layout accordion horizontal vertical"
+cmd-t = "layout floating tiling"
+cmd-f = "fullscreen"
+cmd-ctrl-f = "fullscreen"
+cmd-alt-f = "layout h_accordion"
+
+# Focus windows with Command + arrows.
+cmd-left = "focus left"
+cmd-right = "focus right"
+cmd-up = "focus up"
+cmd-down = "focus down"
+
+# Move windows with Command + Shift + arrows.
+cmd-shift-left = "move left"
+cmd-shift-right = "move right"
+cmd-shift-up = "move up"
+cmd-shift-down = "move down"
+
+# Workspaces, matching Omarchy SUPER + [1-9;0].
+cmd-1 = "workspace 1"
+cmd-2 = "workspace 2"
+cmd-3 = "workspace 3"
+cmd-4 = "workspace 4"
+cmd-5 = "workspace 5"
+cmd-6 = "workspace 6"
+cmd-7 = "workspace 7"
+cmd-8 = "workspace 8"
+cmd-9 = "workspace 9"
+cmd-0 = "workspace 10"
+
+# Move windows to workspaces, matching Omarchy SUPER + SHIFT + [1-9;0].
+cmd-shift-1 = "move-node-to-workspace 1"
+cmd-shift-2 = "move-node-to-workspace 2"
+cmd-shift-3 = "move-node-to-workspace 3"
+cmd-shift-4 = "move-node-to-workspace 4"
+cmd-shift-5 = "move-node-to-workspace 5"
+cmd-shift-6 = "move-node-to-workspace 6"
+cmd-shift-7 = "move-node-to-workspace 7"
+cmd-shift-8 = "move-node-to-workspace 8"
+cmd-shift-9 = "move-node-to-workspace 9"
+cmd-shift-0 = "move-node-to-workspace 10"
+
+# Workspace navigation, matching Omarchy TAB bindings.
+cmd-tab = "workspace next"
+cmd-shift-tab = "workspace prev"
+cmd-ctrl-tab = "workspace-back-and-forth"
+
+# Move workspace to monitors, matching Omarchy SUPER + SHIFT + ALT + arrows.
+cmd-shift-alt-left = "move-workspace-to-monitor left"
+cmd-shift-alt-right = "move-workspace-to-monitor right"
+cmd-shift-alt-up = "move-workspace-to-monitor up"
+cmd-shift-alt-down = "move-workspace-to-monitor down"
+
+# Monitor focus, matching Omarchy CTRL + ALT + TAB behavior.
+ctrl-alt-tab = "focus-monitor --wrap-around next"
+ctrl-alt-shift-tab = "focus-monitor --wrap-around prev"
+
+# Resize windows, similar to Omarchy SUPER +/- bindings.
+cmd-minus = "resize smart -100"
+cmd-equal = "resize smart +100"
+cmd-shift-minus = "resize smart -50"
+cmd-shift-equal = "resize smart +50"
+
+# Utility bindings.
+cmd-space = "exec-and-forget open -a Raycast"
+cmd-escape = "exec-and-forget osascript -e 'tell application \"System Events\" to sleep'"
+cmd-shift-r = "reload-config"
+
+# Service mode for explicit layout and maintenance commands.
+cmd-shift-semicolon = "mode service"
+
+[mode.service.binding]
+esc = ["reload-config", "mode main"]
+r = ["flatten-workspace-tree", "mode main"]
+f = ["layout floating tiling", "mode main"]
+t = ["layout tiles horizontal vertical", "mode main"]
+a = ["layout accordion horizontal vertical", "mode main"]
+b = ["balance-sizes", "mode main"]

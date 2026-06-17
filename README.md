@@ -16,7 +16,7 @@ The shell script installs prerequisites. The repository defines desired state. T
 - GitHub CLI authentication and Git credential integration
 - Pi and Pi packages
 - Node.js/npm runtime for Pi
-- fish, tmux, Neovim/LazyVim-ready placeholder config, Ghostty, mise, uv
+- fish, tmux, Neovim/LazyVim-ready placeholder config, Ghostty, AeroSpace, mise, uv
 - Stow-managed dotfiles
 - Conservative macOS defaults
 
@@ -197,6 +197,7 @@ Examples:
 - `dotfiles/fish/.config/fish/config.fish` -> `~/.config/fish/config.fish`
 - `dotfiles/tmux/.tmux.conf` -> `~/.tmux.conf`
 - `dotfiles/ghostty/.config/ghostty/config` -> `~/.config/ghostty/config`
+- `dotfiles/aerospace/.aerospace.toml` -> `~/.aerospace.toml`
 
 Apply dotfiles:
 

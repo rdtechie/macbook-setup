@@ -139,6 +139,7 @@ What to verify:
   - `~/.config/nvim/init.lua`
   - `~/.tmux.conf`
   - `~/.config/ghostty/config`
+  - `~/.aerospace.toml`
   - `~/.config/mise/config.toml`
 - Re-running the script does not create duplicate backups for already-correct symlinks.
 
