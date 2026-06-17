@@ -1,0 +1,7 @@
+font-family = JetBrainsMono Nerd Font
+font-size = 14
+theme = catppuccin-mocha
+macos-option-as-alt = true
+shell-integration = detect
+window-padding-x = 8
+window-padding-y = 8

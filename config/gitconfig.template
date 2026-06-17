@@ -1,0 +1,24 @@
+# Copy selected values into ~/.gitconfig if you prefer manual setup.
+# setup-git.sh configures these keys without overwriting user.name or user.email.
+
+[user]
+    name = Your Name
+    email = you@example.com
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = false
+
+[fetch]
+    prune = true
+
+[rerere]
+    enabled = true
+
+[core]
+    editor = nvim
+
+[include]
+    path = ~/.gitconfig.macbook-setup

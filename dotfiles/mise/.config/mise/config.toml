@@ -1,0 +1,11 @@
+# Repository-managed mise placeholder.
+# Add explicit runtimes only after deciding they belong in workstation desired state.
+
+[settings]
+experimental = true
+idiomatic_version_file_enable_tools = []
+
+[tools]
+# node = "lts"
+# python = "3.12"
+# go = "latest"

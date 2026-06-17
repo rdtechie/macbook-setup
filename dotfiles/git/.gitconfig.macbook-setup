@@ -1,0 +1,16 @@
+[alias]
+    co = checkout
+    br = branch
+    ci = commit
+    st = status --short --branch
+    lg = log --graph --decorate --oneline --all
+    amend = commit --amend --no-edit
+
+[diff]
+    colorMoved = default
+
+[push]
+    autoSetupRemote = true
+
+[merge]
+    conflictStyle = zdiff3

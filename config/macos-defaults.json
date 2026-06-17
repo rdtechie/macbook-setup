@@ -1,0 +1,73 @@
+{
+  "description": "Documented macOS defaults applied by scripts/apply-macos-defaults.sh.",
+  "settings": [
+    {
+      "domain": "com.apple.screencapture",
+      "key": "location",
+      "value": "$HOME/Pictures/Screenshots",
+      "reason": "Keep screenshots out of Desktop."
+    },
+    {
+      "domain": "com.apple.screencapture",
+      "key": "type",
+      "value": "png",
+      "reason": "Use a broadly compatible screenshot format."
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "AppleShowAllExtensions",
+      "value": true,
+      "reason": "Show file extensions for safer development workflows."
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "ShowPathbar",
+      "value": true,
+      "reason": "Improve Finder navigation."
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "ShowStatusBar",
+      "value": true,
+      "reason": "Show counts and free space in Finder."
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "FXDefaultSearchScope",
+      "value": "SCcf",
+      "reason": "Search the current folder by default."
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "_FXSortFoldersFirst",
+      "value": true,
+      "reason": "Keep folder listings predictable."
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "FXPreferredViewStyle",
+      "value": "Nlsv",
+      "reason": "Prefer list view for file operations."
+    },
+    {
+      "domain": "com.apple.desktopservices",
+      "key": "DSDontWriteNetworkStores",
+      "value": true,
+      "reason": "Avoid .DS_Store files on network volumes."
+    },
+    {
+      "domain": "com.apple.desktopservices",
+      "key": "DSDontWriteUSBStores",
+      "value": true,
+      "reason": "Avoid .DS_Store files on removable volumes."
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "autohide",
+      "value": true,
+      "optional": true,
+      "enabledBy": "ENABLE_DOCK_AUTOHIDE=1",
+      "reason": "Optional preference for more vertical screen space."
+    }
+  ]
+}

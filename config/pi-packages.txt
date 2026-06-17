@@ -1,0 +1,6 @@
+# Pi packages to install during bootstrap.
+# Use plain npm package names or explicit Pi sources such as npm:package-name, git:github.com/user/package-repo, or https://...
+
+pi-web-access
+pi-mcp-adapter
+pi-lens
