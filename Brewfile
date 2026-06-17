@@ -29,5 +29,5 @@ cask "raycast"
 cask "proton-drive"
 cask "proton-mail"
 cask "proton-pass"
-cask "aerospace"
+cask "nikitabobko/tap/aerospace", trusted: true
 cask "snagit"
