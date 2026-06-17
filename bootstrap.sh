@@ -15,6 +15,9 @@ usage() {
   cat <<'USAGE'
 Usage: ./bootstrap.sh [--dry-run] [--help]
 
+Run this script as your normal macOS user. Do not run it with sudo.
+Homebrew may ask for administrator approval during its own installer.
+
 Environment variables:
   REPO_URL          Git URL used when cloning this repo.
   REPO_DIR          Local checkout path. Default: ~/src/macbook-setup
@@ -126,6 +129,19 @@ parse_args() {
   export DRY_RUN
 }
 
+require_not_root() {
+  if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+    return 0
+  fi
+
+  if [[ "$DRY_RUN" == "1" ]]; then
+    warn "Running as root. Continuing because this is a dry run."
+    return 0
+  fi
+
+  die "Do not run bootstrap.sh with sudo. Homebrew refuses root installs and sudo changes HOME. Run as your normal user and approve Homebrew's sudo prompts when requested."
+}
+
 require_macos() {
   if is_macos; then
     log "macOS detected: $(sw_vers -productVersion 2>/dev/null || true)"
@@ -168,7 +184,9 @@ ensure_homebrew() {
     return 0
   fi
 
-  log "Homebrew is missing. Installing Homebrew. The official installer may ask for administrator approval."
+  log "Homebrew is missing. Installing Homebrew as the current user."
+  warn "Do not re-run this script with sudo. The Homebrew installer may ask for your macOS password when it needs administrator approval."
+  warn "If this step cannot prompt correctly, run the Homebrew installer manually, then re-run ./bootstrap.sh."
   run_shell '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
 
   local prefix
@@ -328,6 +346,7 @@ register_pi_skill() {
 
 main() {
   parse_args "$@"
+  require_not_root
   require_macos
   detect_architecture
   ensure_xcode_command_line_tools

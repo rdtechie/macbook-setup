@@ -23,23 +23,35 @@ The shell script installs prerequisites. The repository defines desired state. T
 
 Fresh macOS with network access. No secrets, tokens, passwords, or SSH keys belong in this repository.
 
-The bootstrap script can install Homebrew and Xcode Command Line Tools if missing. Homebrew's official installer may request administrator approval.
+Run `bootstrap.sh` as your normal macOS user. Do not run it with `sudo`. Homebrew refuses root installs, and `sudo` changes `$HOME`, which would put repo state and Pi config under `/var/root`.
+
+The bootstrap script can install Xcode Command Line Tools and Homebrew if missing. Homebrew's official installer may ask for administrator approval. Approve that prompt when it appears, but do not start this repo's bootstrap script with `sudo`.
 
 ## Fresh MacBook usage
 
-Remote bootstrap flow:
+Recommended first run on a fresh Mac:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rdtechie/macbook-setup/main/bootstrap.sh | bash
+# 1. Install Xcode Command Line Tools if missing.
+xcode-select -p >/dev/null 2>&1 || xcode-select --install
+
+# 2. Install Homebrew manually if missing. This installer may ask for your macOS password.
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 3. Load Homebrew in the current shell.
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"   # Apple Silicon
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"      # Intel
+fi
+
+# 4. Clone and run the repository bootstrap as your normal user.
+git clone git@github.com:rdtechie/macbook-setup.git ~/src/macbook-setup
+cd ~/src/macbook-setup
+./bootstrap.sh
 ```
 
-For the remote flow, publish the repo first and set `REPO_URL` if your repository is not the default placeholder:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/rdtechie/macbook-setup/main/bootstrap.sh | REPO_URL=https://github.com/rdtechie/macbook-setup.git bash
-```
-
-Safer local flow:
+If Homebrew is already installed, the shorter local flow is enough:
 
 ```bash
 git clone git@github.com:rdtechie/macbook-setup.git ~/src/macbook-setup
@@ -47,12 +59,65 @@ cd ~/src/macbook-setup
 ./bootstrap.sh
 ```
 
-Then continue with Pi:
+Remote bootstrap flow, useful after Homebrew is already working:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rdtechie/macbook-setup/main/bootstrap.sh | bash
+```
+
+Do not use this:
+
+```bash
+sudo ./bootstrap.sh
+curl -fsSL https://raw.githubusercontent.com/rdtechie/macbook-setup/main/bootstrap.sh | sudo bash
+```
+
+## First Pi session
+
+After bootstrap completes:
 
 ```bash
 cd ~/src/macbook-setup
 pi
-/skill:macbook-setup
+```
+
+Inside Pi:
+
+1. If Pi asks whether to trust the project, trust this repository. The repo contains the local skill and plan that Pi needs to load.
+2. Authenticate an AI provider:
+
+   ```text
+   /login
+   ```
+
+   For GitHub Copilot, select `GitHub Copilot`. When asked for the host, press Enter for `github.com` unless you use GitHub Enterprise Server. Complete the browser/device-code login. Pi stores OAuth tokens in `~/.pi/agent/auth.json`, not in this repository.
+
+3. Select a model:
+
+   ```text
+   /model
+   ```
+
+   Recommended with GitHub Copilot: choose the latest available Claude Sonnet model, for example `claude-sonnet-4-5` if shown. It is the best default for multi-file repo setup, shell-script review, and agentic edits. If Sonnet is unavailable, choose the latest Copilot-backed coding model shown by Pi, for example a GPT-5 Codex/GPT-5 model if available.
+
+   If Pi says a Copilot model is not supported, open VS Code, go to Copilot Chat's model selector, select that model once, and enable it. Then return to Pi and run `/model` again.
+
+4. Start the repository skill:
+
+   ```text
+   /skill:macbook-setup
+   ```
+
+The skill will read `plans/implementation-plan.md`, execute phases in order, verify after major steps, and report manual follow-up.
+
+Useful Pi commands during setup:
+
+```text
+/login          authenticate or switch provider credentials
+/model          choose model
+/settings       adjust thinking level, theme, and behavior
+/reload         reload skills after editing SKILL.md
+/quit           exit Pi
 ```
 
 ## Re-run/update usage
@@ -191,6 +256,20 @@ gh auth setup-git
 
 If Xcode Command Line Tools installation starts, finish the GUI installer, then re-run `./bootstrap.sh`.
 
+If Homebrew installation fails because it needs administrator approval, do not retry with `sudo ./bootstrap.sh`. Run the official Homebrew installer manually as your normal user, approve its sudo prompt, load `brew shellenv`, then re-run `./bootstrap.sh`.
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+./bootstrap.sh
+```
+
+If Pi starts without an authenticated provider, run `/login`, select `GitHub Copilot`, complete browser authentication, then run `/model` and choose the latest available Claude Sonnet model or Copilot coding model.
+
 If `/etc/shells` does not include fish, run `./scripts/setup-fish.sh` and approve the isolated sudo prompt, or add the printed path manually.
 
 ## Manual steps still required
@@ -198,6 +277,7 @@ If `/etc/shells` does not include fish, run `./scripts/setup-fish.sh` and approv
 - Sign in to macOS services and App Store if needed.
 - Sign in to 1Password, Vivaldi, Raycast, Ghostty, and Visual Studio Code.
 - Authenticate GitHub CLI with `gh auth login --web` if skipped during bootstrap.
+- Authenticate Pi with `/login`, for example GitHub Copilot, then choose a model with `/model`.
 - Configure `git user.name` and `git user.email` if not already set.
 - Review and customize `Brewfile`, dotfiles, and `dotfiles/mise/.config/mise/config.toml` for personal runtime choices.
 - Optionally change login shell with `./scripts/setup-fish.sh --change-shell`.
