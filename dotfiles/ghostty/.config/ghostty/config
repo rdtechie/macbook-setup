@@ -1,6 +1,6 @@
 font-family = JetBrainsMono Nerd Font
 font-size = 14
-theme = catppuccin-mocha
+theme = Rose Pine
 macos-option-as-alt = true
 shell-integration = detect
 window-padding-x = 8

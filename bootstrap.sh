@@ -8,7 +8,7 @@ SKIP_GH_AUTH="${SKIP_GH_AUTH:-0}"
 SKIP_PI_INSTALL="${SKIP_PI_INSTALL:-0}"
 SKIP_PI_PACKAGES="${SKIP_PI_PACKAGES:-0}"
 SKIP_PI_START="${SKIP_PI_START:-0}"
-PI_INSTALL_COMMAND="${PI_INSTALL_COMMAND:-npm install -g --ignore-scripts @earendil-works/pi-coding-agent}"
+PI_INSTALL_COMMAND="${PI_INSTALL_COMMAND:-npm install -g --prefix \$(brew --prefix) --ignore-scripts @earendil-works/pi-coding-agent}"
 HOMEBREW_PKG_URL="${HOMEBREW_PKG_URL:-https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg}"
 
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
@@ -28,7 +28,7 @@ Environment variables:
   SKIP_PI_INSTALL   Set to 1 to skip installing pi when missing.
   SKIP_PI_PACKAGES  Set to 1 to skip installing packages from config/pi-packages.txt.
   SKIP_PI_START     Set to 1 to skip launching pi after bootstrap.
-  PI_INSTALL_COMMAND Command used to install pi. Default: npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+  PI_INSTALL_COMMAND Command used to install pi. Default: npm install -g --prefix $(brew --prefix) --ignore-scripts @earendil-works/pi-coding-agent
 USAGE
 }
 
@@ -51,10 +51,10 @@ run() {
 run_shell() {
   local command_string="$1"
   if [[ "$DRY_RUN" == "1" ]]; then
-    printf '[dry-run] bash -lc %q\n' "$command_string"
+    printf '[dry-run] bash -c %q\n' "$command_string"
     return 0
   fi
-  bash -lc "$command_string"
+  bash -c "$command_string"
 }
 
 install_homebrew_pkg() {
@@ -150,6 +150,20 @@ refresh_homebrew_env() {
 
   load_homebrew_env || die "Homebrew is installed but its shell environment could not be loaded."
   log "Homebrew environment loaded from $(brew --prefix)."
+}
+
+refresh_node_global_path() {
+  export PATH="$HOME/.local/bin:$PATH"
+
+  if command_exists npm; then
+    local npm_prefix
+    npm_prefix="$(npm prefix -g 2>/dev/null || true)"
+    if [[ -n "$npm_prefix" && -d "$npm_prefix/bin" ]]; then
+      export PATH="$npm_prefix/bin:$PATH"
+    fi
+  fi
+
+  hash -r 2>/dev/null || true
 }
 
 parse_args() {
@@ -322,6 +336,8 @@ ensure_node_runtime() {
     refresh_homebrew_env
   fi
 
+  refresh_node_global_path
+
   if command_exists node && command_exists npm; then
     log "Node.js detected: $(node --version 2>/dev/null || command -v node)"
     log "npm detected: $(npm --version 2>/dev/null || command -v npm)"
@@ -351,6 +367,15 @@ install_pi() {
 
   log "Installing Pi with: $PI_INSTALL_COMMAND"
   run_shell "$PI_INSTALL_COMMAND"
+  refresh_node_global_path
+
+  if [[ "$DRY_RUN" != "1" ]] && ! command_exists pi; then
+    die "Pi install completed but 'pi' is not on PATH. Expected global binary under $(brew --prefix)/bin."
+  fi
+
+  if command_exists pi; then
+    log "Pi installed globally: $(command -v pi)"
+  fi
 }
 
 install_pi_packages() {

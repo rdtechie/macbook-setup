@@ -168,7 +168,7 @@ Dry runs print intended commands without making changes. `verify.sh` is read-onl
 - `SKIP_PI_INSTALL=1`: skip installing Pi.
 - `SKIP_PI_PACKAGES=1`: skip installing packages in `config/pi-packages.txt`.
 - `SKIP_PI_START=1`: skip launching Pi after bootstrap.
-- `PI_INSTALL_COMMAND`: command used to install Pi. Default: `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`.
+- `PI_INSTALL_COMMAND`: command used to install Pi. Default: `npm install -g --prefix $(brew --prefix) --ignore-scripts @earendil-works/pi-coding-agent`.
 
 Example:
 
@@ -290,7 +290,7 @@ npm --version
 ./bootstrap.sh
 ```
 
-Pi is installed with npm by default and needs Node.js at runtime.
+Pi is installed with npm into Homebrew's global prefix by default and needs Node.js at runtime.
 
 If Pi starts without an authenticated provider, run `/login`, select `GitHub Copilot`, complete browser authentication, then run `/model` and choose the latest available Claude Sonnet model or Copilot coding model.
 
