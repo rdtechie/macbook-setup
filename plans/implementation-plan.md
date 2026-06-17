@@ -61,7 +61,7 @@ What to verify:
   - Apple Silicon: `/opt/homebrew`
   - Intel: `/usr/local`
 - `brew bundle --file Brewfile` completes.
-- Required CLI tools exist: `git`, `gh`, `stow`, `fish`, `tmux`, `nvim`, `mise`, `uv`, `node`, and `npm`.
+- Required CLI tools exist: `git`, `gh`, `stow`, `fish`, `tmux`, `nvim`, `lazygit`, `mise`, `uv`, `node`, and `npm`.
 - Required casks are installed or Homebrew reports actionable cask failures.
 
 Stop conditions:

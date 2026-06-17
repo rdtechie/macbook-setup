@@ -16,7 +16,7 @@ The shell script installs prerequisites. The repository defines desired state. T
 - GitHub CLI authentication and Git credential integration
 - Pi and Pi packages
 - Node.js/npm runtime for Pi
-- fish, tmux, Neovim/LazyVim-ready placeholder config, Ghostty, AeroSpace, mise, uv
+- fish, tmux, Neovim/LazyVim, lazygit, Ghostty, AeroSpace, mise, uv
 - Stow-managed dotfiles
 - Conservative macOS defaults
 
@@ -196,6 +196,7 @@ Examples:
 
 - `dotfiles/fish/.config/fish/config.fish` -> `~/.config/fish/config.fish`
 - `dotfiles/tmux/.tmux.conf` -> `~/.tmux.conf`
+- `dotfiles/nvim/.config/nvim/init.lua` -> `~/.config/nvim/init.lua`
 - `dotfiles/ghostty/.config/ghostty/config` -> `~/.config/ghostty/config`
 - `dotfiles/aerospace/.aerospace.toml` -> `~/.aerospace.toml`
 
@@ -207,6 +208,8 @@ Apply dotfiles:
 ```
 
 The script backs up conflicts before stowing. It does not delete user files.
+
+The Neovim package uses the LazyVim starter pattern. First `nvim` launch bootstraps `lazy.nvim`, installs LazyVim plugins, and exposes lazygit inside Neovim with `<leader>gg`.
 
 ## Customize the Pi skill
 

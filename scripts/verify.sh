@@ -162,6 +162,7 @@ main() {
   check_command mise
   check_command uv
   check_command stow
+  check_command lazygit
 
   check_dotfile_link "$HOME/.config/fish/config.fish" "fish config"
   check_dotfile_link "$HOME/.gitconfig.macbook-setup" "git include config"

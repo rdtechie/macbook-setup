@@ -93,6 +93,7 @@ main() {
   check_tool fzf
   check_tool bat
   check_tool eza
+  check_tool lazygit
   check_tool zoxide
   check_tool starship
   check_tool node
