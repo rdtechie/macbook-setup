@@ -53,6 +53,19 @@ run_shell() {
   bash -lc "$command_string"
 }
 
+run_homebrew_installer() {
+  local install_url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+
+  if [[ "$DRY_RUN" == "1" ]]; then
+    printf '[dry-run] /bin/bash -c "$(curl -fsSL %s)"\n' "$install_url"
+    return 0
+  fi
+
+  # Run the official installer directly from this terminal, without an extra bash -lc wrapper,
+  # so sudo prompts stay attached to the user's interactive session.
+  /bin/bash -c "$(curl -fsSL "$install_url")"
+}
+
 ensure_dir() {
   local dir="$1"
   run mkdir -p "$dir"
@@ -187,7 +200,7 @@ ensure_homebrew() {
   log "Homebrew is missing. Installing Homebrew as the current user."
   warn "Do not re-run this script with sudo. The Homebrew installer may ask for your macOS password when it needs administrator approval."
   warn "If this step cannot prompt correctly, run the Homebrew installer manually, then re-run ./bootstrap.sh."
-  run_shell '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+  run_homebrew_installer
 
   local prefix
   prefix="$(brew_prefix_guess)"
